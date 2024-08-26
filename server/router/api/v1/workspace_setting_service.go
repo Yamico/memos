@@ -220,6 +220,8 @@ func convertWorkspaceMemoRelatedSettingFromStore(setting *storepb.WorkspaceMemoR
 		EnableAutoCompact:        setting.EnableAutoCompact,
 		EnableDoubleClickEdit:    setting.EnableDoubleClickEdit,
 		EnableLinkPreview:        setting.EnableLinkPreview,
+		EnableMondayFirstDay:     setting.EnableMondayFirstDay,
+		EnableExtensionStatics:   setting.EnableExtensionStatics,
 	}
 }
 
@@ -234,5 +236,7 @@ func convertWorkspaceMemoRelatedSettingToStore(setting *v1pb.WorkspaceMemoRelate
 		EnableAutoCompact:        setting.EnableAutoCompact,
 		EnableDoubleClickEdit:    setting.EnableDoubleClickEdit,
 		EnableLinkPreview:        setting.EnableLinkPreview,
+		EnableMondayFirstDay:     setting.EnableMondayFirstDay,
+		EnableExtensionStatics:   setting.EnableExtensionStatics,
 	}
 }

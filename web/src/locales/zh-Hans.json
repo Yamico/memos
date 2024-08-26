@@ -108,6 +108,7 @@
     "fetch-more": "点击获取更多",
     "fetching-data": "正在获取数据…",
     "links": "链接",
+    "no-tags": "无标签",
     "no-archived-memos": "无存档的 Memo。",
     "search-placeholder": "搜索 Memos",
     "show-more": "查看更多",
@@ -135,7 +136,9 @@
     "restored-successfully": "恢复成功",
     "succeed-copy-link": "复制链接到剪贴板成功。",
     "update-succeed": "更新成功",
-    "user-not-found": "未找到该用户"
+    "user-not-found": "未找到该用户",
+    "no-more-memos": "没有更多Memos",
+    "memo-updated-datetime": "Memos时间已更新"
   },
   "reference": {
     "add-references": "添加引用",
@@ -180,6 +183,12 @@
     "go-to-home": "回到首页"
   },
   "setting": {
+    "menu":{
+      "make-calendar-filterd":"日历同步过滤",
+      "enable-tag-multi-select":"启用标签多选",
+      "enable-not-search":"启用'非'查询",
+      "enable-or-search":"启用'或'查询"
+    },
     "account-section": {
       "change-password": "修改密码",
       "email-note": "可选",
@@ -293,6 +302,8 @@
       "display-with-updated-time": "根据最后修改时间顺序显示",
       "enable-auto-compact": "启用自动超长折叠显示",
       "enable-double-click-to-edit": "启用双击编辑",
+      "enable-monday-as-first-day": "启用周一作为一周第一天",
+      "enable-extension-statics": "启用拓展数据统计面板.",
       "enable-password-login": "启用密码登录",
       "enable-password-login-warning": "启用所有用户的密码登录。如果希望用户同时使用单点登录和密码登录，请开启密码登录",
       "max-upload-size": "最大上传大小 (MiB)",

@@ -40,7 +40,10 @@ func (d *DB) CreateMemo(ctx context.Context, create *store.Memo) (*store.Memo, e
 
 func (d *DB) ListMemos(ctx context.Context, find *store.FindMemo) ([]*store.Memo, error) {
 	where, args := []string{"1 = 1"}, []any{}
-
+	where_content, args := []string{}, []any{}
+	where_tags, args := []string{}, []any{}
+	sql_where_content := ""
+	sql_where_tags := ""
 	if v := find.ID; v != nil {
 		where, args = append(where, "`memo`.`id` = ?"), append(args, *v)
 	}
@@ -67,7 +70,17 @@ func (d *DB) ListMemos(ctx context.Context, find *store.FindMemo) ([]*store.Memo
 	}
 	if v := find.ContentSearch; len(v) != 0 {
 		for _, s := range v {
-			where, args = append(where, "`memo`.`content` LIKE ?"), append(args, fmt.Sprintf("%%%s%%", s))
+			condition := "`memo`.`content` LIKE ?"
+			formattedContent := fmt.Sprintf("%%%s%%", s)
+			exclamationRune := '！'
+			if find.EnableNot && len(s) > 0 {
+				runes := []rune(s)
+				if runes[0] == '!' || runes[0] == exclamationRune {
+					condition = "`memo`.`content` NOT LIKE ?"
+					formattedContent = fmt.Sprintf("%%%s%%", string(runes[1:]))
+				}
+			}
+			where_content, args = append(where_content, condition), append(args, formattedContent)
 		}
 	}
 	if v := find.VisibilityList; len(v) != 0 {
@@ -84,11 +97,21 @@ func (d *DB) ListMemos(ctx context.Context, find *store.FindMemo) ([]*store.Memo
 		}
 		if len(v.TagSearch) != 0 {
 			for _, tag := range v.TagSearch {
-				where, args = append(where, "JSON_EXTRACT(`memo`.`payload`, '$.property.tags') LIKE ?"), append(args, fmt.Sprintf(`%%"%s"%%`, tag))
+				condition := "JSON_EXTRACT(`memo`.`payload`, '$.property.tags') LIKE ?"
+				formattedTag := fmt.Sprintf(`%%%s%%`, tag)
+				if find.EnableNot && len(tag) > 0 && tag[0] == '!' {
+					condition = "JSON_EXTRACT(`memo`.`payload`, '$.property.tags') NOT LIKE ?"
+					formattedTag = fmt.Sprintf(`%%%s%%`, tag[1:])
+				}
+
+				where_tags, args = append(where_tags, condition), append(args, formattedTag)
 			}
 		}
 		if v.HasLink {
 			where = append(where, "JSON_EXTRACT(`memo`.`payload`, '$.property.hasLink') IS TRUE")
+		}
+		if v.HasNoTag {
+			where = append(where, "JSON_EXTRACT(`memo`.`payload`, '$.property.hasNoTag') IS TRUE")
 		}
 		if v.HasTaskList {
 			where = append(where, "JSON_EXTRACT(`memo`.`payload`, '$.property.hasTaskList') IS TRUE")
@@ -137,11 +160,27 @@ func (d *DB) ListMemos(ctx context.Context, find *store.FindMemo) ([]*store.Memo
 	if !find.ExcludeContent {
 		fields = append(fields, "`memo`.`content` AS `content`")
 	}
-
+	if find.EnableOr {
+		sql_where_content = strings.Join(where_content, " OR ")
+		sql_where_tags = strings.Join(where_tags, " OR ")
+	} else {
+		sql_where_content = strings.Join(where_content, " AND ")
+		sql_where_tags = strings.Join(where_tags, " AND ")
+	}
+	if len(where_content) == 0 {
+		sql_where_content = " 1 = 1 "
+	} else {
+		sql_where_content = " ( " + sql_where_content + " ) "
+	}
+	if len(where_tags) == 0 {
+		sql_where_tags = " 1 = 1 "
+	} else {
+		sql_where_tags = " ( " + sql_where_tags + " ) "
+	}
 	query := "SELECT " + strings.Join(fields, ", ") + "FROM `memo` " +
 		"LEFT JOIN `memo_organizer` ON `memo`.`id` = `memo_organizer`.`memo_id` AND `memo`.`creator_id` = `memo_organizer`.`user_id` " +
 		"LEFT JOIN `memo_relation` ON `memo`.`id` = `memo_relation`.`memo_id` AND `memo_relation`.`type` = \"COMMENT\" " +
-		"WHERE " + strings.Join(where, " AND ") + " " +
+		"WHERE " + strings.Join(where, " AND ") + " AND " + sql_where_content + " AND " + sql_where_tags +
 		"ORDER BY " + strings.Join(orderBy, ", ")
 	if find.Limit != nil {
 		query = fmt.Sprintf("%s LIMIT %d", query, *find.Limit)

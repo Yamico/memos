@@ -89,6 +89,9 @@ func (d *DB) ListMemos(ctx context.Context, find *store.FindMemo) ([]*store.Memo
 		if v.HasLink {
 			where = append(where, "(memo.payload->'property'->>'hasLink')::BOOLEAN IS TRUE")
 		}
+		if v.HasNoTag {
+			where = append(where, "(memo.payload->'property'->>'hasNoTag')::BOOLEAN IS TRUE")
+		}
 		if v.HasTaskList {
 			where = append(where, "(memo.payload->'property'->>'hasTaskList')::BOOLEAN IS TRUE")
 		}

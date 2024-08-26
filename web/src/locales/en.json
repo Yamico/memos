@@ -117,6 +117,7 @@
       "public": "Public"
     },
     "links": "Links",
+    "no-tags": "No Tags",
     "to-do": "To-do",
     "code": "Code"
   },
@@ -135,7 +136,9 @@
     "restored-successfully": "Restored successfully",
     "succeed-copy-link": "Link copied successfully.",
     "update-succeed": "Update succeeded",
-    "user-not-found": "User not found"
+    "user-not-found": "User not found",
+    "no-more-memos": "No more Memos",
+    "memo-updated-datetime": "Memo Updated datetime"
   },
   "reference": {
     "add-references": "Add references",
@@ -180,6 +183,12 @@
     "go-to-home": "Go to Home"
   },
   "setting": {
+    "menu":{
+      "make-calendar-filterd":"Make Calendar Filtered",
+      "enable-tag-multi-select":"Enable Tags Multi-Select ",
+      "enable-not-search":"Enable NOT Search",
+      "enable-or-search":"Enable OR Search"
+    },
     "account-section": {
       "change-password": "Change password",
       "email-note": "Optional",
@@ -292,6 +301,8 @@
       "display-with-updated-time": "Display with updated time",
       "enable-auto-compact": "Enable auto compact",
       "enable-double-click-to-edit": "Enable double click to edit",
+      "enable-monday-as-first-day": "Enable Monday as Firstday",
+      "enable-extension-statics": "Enable additional statistics panels.",
       "enable-password-login": "Enable password login",
       "enable-password-login-warning": "This will enable password login for all users. Continue only if you want to users to be able to log in using both SSO and password",
       "max-upload-size": "Maximum upload size (MiB)",

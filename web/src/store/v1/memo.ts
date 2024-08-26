@@ -88,10 +88,18 @@ export const useMemoStore = create(
       delete memoMap[name];
       set({ stateId: uniqueId(), memoMapByName: memoMap });
     },
+    replaceMemos: (newMemos: Record<string, Memo>) => {
+      set({ stateId: uniqueId(), memoMapByName: { ...newMemos } });
+    },
+    
   })),
 );
 
 export const useMemoList = () => {
+  const { getState, replaceMemos } = useMemoStore(state => ({
+    getState: state.getState,
+    replaceMemos: state.replaceMemos
+  }));
   const memoStore = useMemoStore();
   const memos = Object.values(memoStore.getState().memoMapByName);
 
@@ -107,5 +115,6 @@ export const useMemoList = () => {
     value: memos,
     reset,
     size,
+    replaceMemos,
   };
 };

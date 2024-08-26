@@ -16,6 +16,7 @@ import { useMemoFilterStore, useMemoList, useMemoStore } from "@/store/v1";
 import { RowStatus } from "@/types/proto/api/v1/common";
 import { useTranslate } from "@/utils/i18n";
 
+
 const Home = () => {
   const t = useTranslate();
   const { md } = useResponsiveWidth();
@@ -39,11 +40,10 @@ const Home = () => {
     fetchMemos("");
   }, [memoFilterStore.filters]);
 
-  const fetchMemos = async (nextPageToken: string) => {
-    setIsRequesting(true);
-    const filters = [`creator == "${user.name}"`, `row_status == "NORMAL"`, `order_by_pinned == true`];
+  const update_normal_search_filter = (filters: string[])=>{
     const contentSearch: string[] = [];
     const tagSearch: string[] = [];
+
     for (const filter of memoFilterStore.filters) {
       if (filter.factor === "contentSearch") {
         contentSearch.push(`"${filter.value}"`);
@@ -51,12 +51,14 @@ const Home = () => {
         tagSearch.push(`"${filter.value}"`);
       } else if (filter.factor === "property.hasLink") {
         filters.push(`has_link == true`);
+      } else if (filter.factor === "property.hasNoTag") {
+        filters.push(`has_no_tag == true`);
       } else if (filter.factor === "property.hasTaskList") {
         filters.push(`has_task_list == true`);
       } else if (filter.factor === "property.hasCode") {
         filters.push(`has_code == true`);
       } else if (filter.factor === "displayTime") {
-        const timestampAfter = new Date(filter.value).getTime() / 1000;
+        const timestampAfter = new Date(new Date(filter.value).setHours(0, 0, 0, 0)).getTime() / 1000;
         filters.push(`display_time_after == ${timestampAfter}`);
         filters.push(`display_time_before == ${timestampAfter + 60 * 60 * 24}`);
       }
@@ -65,14 +67,24 @@ const Home = () => {
       filters.push(`order_by_time_asc == true`);
     }
     if (contentSearch.length > 0) {
-      filters.push(`content_search == [${contentSearch.join(", ")}]`);
+        filters.push(`content_search == [${contentSearch.join(", ")}]`);
     }
     if (tagSearch.length > 0) {
       filters.push(`tag_search == [${tagSearch.join(", ")}]`);
     }
+    return filters
+
+  };
+
+  const fetchMemos = async (nextPageToken: string) => {
+    setIsRequesting(true);
+    const filters = [`creator == "${user.name}"`, `row_status == "NORMAL"`, `order_by_pinned == true`];
+    update_normal_search_filter(filters);
     const response = await memoStore.fetchMemos({
       pageSize: DEFAULT_LIST_MEMOS_PAGE_SIZE,
       filter: filters.join(" && "),
+      enableOr: memoFilterStore.enableORSearch,
+      enableNot: memoFilterStore.enableNOTSearch,
       pageToken: nextPageToken,
     });
     setIsRequesting(false);

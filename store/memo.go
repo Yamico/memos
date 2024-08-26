@@ -81,7 +81,11 @@ type FindMemo struct {
 	OrderByUpdatedTs bool
 	OrderByPinned    bool
 
-	OrderByTimeAsc bool
+	OrderByTimeAsc   bool
+
+	// Logic fields
+	EnableOr         bool 
+	EnableNot        bool
 }
 
 type FindMemoPayload struct {
@@ -91,6 +95,7 @@ type FindMemoPayload struct {
 	HasTaskList        bool
 	HasCode            bool
 	HasIncompleteTasks bool
+	HasNoTag             bool
 }
 
 type UpdateMemo struct {

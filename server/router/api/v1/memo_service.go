@@ -91,7 +91,7 @@ func (s *APIV1Service) ListMemos(ctx context.Context, request *v1pb.ListMemosReq
 		// Exclude comments by default.
 		ExcludeComments: true,
 	}
-	if err := s.buildMemoFindWithFilter(ctx, memoFind, request.Filter); err != nil {
+	if err := s.buildMemoFindWithFilter(ctx, memoFind, request.Filter, request.EnableOr, request.EnableNot); err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "failed to build find memos with filter: %v", err)
 	}
 
@@ -498,7 +498,7 @@ func (s *APIV1Service) ExportMemos(ctx context.Context, request *v1pb.ExportMemo
 		// Exclude comments by default.
 		ExcludeComments: true,
 	}
-	if err := s.buildMemoFindWithFilter(ctx, memoFind, request.Filter); err != nil {
+	if err := s.buildMemoFindWithFilter(ctx, memoFind, request.Filter, request.EnableOr, request.EnableNot); err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "failed to build find memos with filter: %v", err)
 	}
 
@@ -553,7 +553,9 @@ func (s *APIV1Service) ListMemoProperties(ctx context.Context, request *v1pb.Lis
 		}
 		memoFind.ID = &memoID
 	}
-
+	if err := s.buildMemoFindWithFilter(ctx, memoFind, request.Filter, request.EnableOr, request.EnableNot); err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "failed to build find memos with filter: %v", err)
+	}
 	memos, err := s.Store.ListMemos(ctx, memoFind)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to list memos")
@@ -641,7 +643,7 @@ func (s *APIV1Service) ListMemoTags(ctx context.Context, request *v1pb.ListMemoT
 		}
 		memoFind.ID = &memoID
 	}
-	if err := s.buildMemoFindWithFilter(ctx, memoFind, request.Filter); err != nil {
+	if err := s.buildMemoFindWithFilter(ctx, memoFind, request.Filter, request.EnableOr, request.EnableNot); err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "failed to build find memos with filter: %v", err)
 	}
 
@@ -832,6 +834,7 @@ func convertMemoPropertyFromStore(property *storepb.MemoPayload_Property) *v1pb.
 	return &v1pb.MemoProperty{
 		Tags:               property.Tags,
 		HasLink:            property.HasLink,
+		HasNoTag:           property.HasNoTag,
 		HasTaskList:        property.HasTaskList,
 		HasCode:            property.HasCode,
 		HasIncompleteTasks: property.HasIncompleteTasks,
@@ -864,7 +867,7 @@ func convertVisibilityToStore(visibility v1pb.Visibility) store.Visibility {
 	}
 }
 
-func (s *APIV1Service) buildMemoFindWithFilter(ctx context.Context, find *store.FindMemo, filter string) error {
+func (s *APIV1Service) buildMemoFindWithFilter(ctx context.Context, find *store.FindMemo, filter string, enableOr bool, enableNot bool) error {
 	if find == nil {
 		find = &store.FindMemo{}
 	}
@@ -947,6 +950,9 @@ func (s *APIV1Service) buildMemoFindWithFilter(ctx context.Context, find *store.
 		if filter.HasLink {
 			find.PayloadFind.HasLink = true
 		}
+		if filter.HasNoTag {
+			find.PayloadFind.HasNoTag = true
+		}
 		if filter.HasTaskList {
 			find.PayloadFind.HasTaskList = true
 		}
@@ -955,6 +961,12 @@ func (s *APIV1Service) buildMemoFindWithFilter(ctx context.Context, find *store.
 		}
 		if filter.HasIncompleteTasks {
 			find.PayloadFind.HasIncompleteTasks = true
+		}
+		if enableOr {
+			find.EnableOr = true
+		}
+		if enableNot {
+			find.EnableNot = true
 		}
 	}
 
@@ -1011,6 +1023,7 @@ var MemoFilterCELAttributes = []cel.EnvOption{
 	cel.Variable("has_task_list", cel.BoolType),
 	cel.Variable("has_code", cel.BoolType),
 	cel.Variable("has_incomplete_tasks", cel.BoolType),
+	cel.Variable("has_no_tag", cel.BoolType),
 }
 
 type MemoFilter struct {
@@ -1027,6 +1040,7 @@ type MemoFilter struct {
 	Limit              *int
 	IncludeComments    bool
 	HasLink            bool
+	HasNoTag           bool
 	HasTaskList        bool
 	HasCode            bool
 	HasIncompleteTasks bool
@@ -1055,64 +1069,68 @@ func findMemoField(callExpr *expr.Expr_Call, filter *MemoFilter) {
 	if len(callExpr.Args) == 2 {
 		idExpr := callExpr.Args[0].GetIdentExpr()
 		if idExpr != nil {
-			if idExpr.Name == "content_search" {
+			switch idExpr.Name {
+			case "content_search":
 				contentSearch := []string{}
 				for _, expr := range callExpr.Args[1].GetListExpr().GetElements() {
 					value := expr.GetConstExpr().GetStringValue()
 					contentSearch = append(contentSearch, value)
 				}
 				filter.ContentSearch = contentSearch
-			} else if idExpr.Name == "visibilities" {
+			case "visibilities":
 				visibilities := []store.Visibility{}
 				for _, expr := range callExpr.Args[1].GetListExpr().GetElements() {
 					value := expr.GetConstExpr().GetStringValue()
 					visibilities = append(visibilities, store.Visibility(value))
 				}
 				filter.Visibilities = visibilities
-			} else if idExpr.Name == "tag_search" {
+			case "tag_search":
 				tagSearch := []string{}
 				for _, expr := range callExpr.Args[1].GetListExpr().GetElements() {
 					value := expr.GetConstExpr().GetStringValue()
 					tagSearch = append(tagSearch, value)
 				}
 				filter.TagSearch = tagSearch
-			} else if idExpr.Name == "order_by_pinned" {
+			case "order_by_pinned":
 				value := callExpr.Args[1].GetConstExpr().GetBoolValue()
 				filter.OrderByPinned = value
-			} else if idExpr.Name == "order_by_time_asc" {
+			case "order_by_time_asc":
 				value := callExpr.Args[1].GetConstExpr().GetBoolValue()
 				filter.OrderByTimeAsc = value
-			} else if idExpr.Name == "display_time_before" {
+			case "display_time_before":
 				displayTimeBefore := callExpr.Args[1].GetConstExpr().GetInt64Value()
 				filter.DisplayTimeBefore = &displayTimeBefore
-			} else if idExpr.Name == "display_time_after" {
+			case "display_time_after":
 				displayTimeAfter := callExpr.Args[1].GetConstExpr().GetInt64Value()
 				filter.DisplayTimeAfter = &displayTimeAfter
-			} else if idExpr.Name == "creator" {
+			case "creator":
 				creator := callExpr.Args[1].GetConstExpr().GetStringValue()
 				filter.Creator = &creator
-			} else if idExpr.Name == "row_status" {
+			case "row_status":
 				rowStatus := store.RowStatus(callExpr.Args[1].GetConstExpr().GetStringValue())
 				filter.RowStatus = &rowStatus
-			} else if idExpr.Name == "random" {
+			case "random":
 				value := callExpr.Args[1].GetConstExpr().GetBoolValue()
 				filter.Random = value
-			} else if idExpr.Name == "limit" {
+			case "limit":
 				limit := int(callExpr.Args[1].GetConstExpr().GetInt64Value())
 				filter.Limit = &limit
-			} else if idExpr.Name == "include_comments" {
+			case "include_comments":
 				value := callExpr.Args[1].GetConstExpr().GetBoolValue()
 				filter.IncludeComments = value
-			} else if idExpr.Name == "has_link" {
+			case "has_link":
 				value := callExpr.Args[1].GetConstExpr().GetBoolValue()
 				filter.HasLink = value
-			} else if idExpr.Name == "has_task_list" {
+			case "has_no_tag":
+				value := callExpr.Args[1].GetConstExpr().GetBoolValue()
+				filter.HasNoTag = value
+			case "has_task_list":
 				value := callExpr.Args[1].GetConstExpr().GetBoolValue()
 				filter.HasTaskList = value
-			} else if idExpr.Name == "has_code" {
+			case "has_code":
 				value := callExpr.Args[1].GetConstExpr().GetBoolValue()
 				filter.HasCode = value
-			} else if idExpr.Name == "has_incomplete_tasks" {
+			case "has_incomplete_tasks":
 				value := callExpr.Args[1].GetConstExpr().GetBoolValue()
 				filter.HasIncompleteTasks = value
 			}
@@ -1152,6 +1170,10 @@ func getMemoPropertyFromContent(content string) (*storepb.MemoPayload_Property, 
 			property.HasCode = true
 		}
 	})
+	if len(property.Tags) == 0 {
+		property.HasNoTag = true
+	}
+
 	return property, nil
 }
 

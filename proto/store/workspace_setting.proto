@@ -90,4 +90,9 @@ message WorkspaceMemoRelatedSetting {
   bool enable_double_click_edit = 5;
   // enable_link_preview enables links preview.
   bool enable_link_preview = 6;
+  // enable_monday_first_day enable monday as first day of the week.
+  bool enable_monday_first_day = 7;
+  // enable_extension_statics the extension feature for additional statistics panels.
+  bool enable_extension_statics = 8;
+
 }

@@ -79,11 +79,15 @@ const TagItemContainer: React.FC<TagItemContainerProps> = (props: TagItemContain
   const { tag } = props;
   const memoFilterStore = useMemoFilterStore();
   const tagFilters = memoFilterStore.getFiltersByFactor("tagSearch");
+  const contentFilters = memoFilterStore.getFiltersByFactor("contentSearch");
   const isActive = tagFilters.some((f) => f.value === tag.text);
   const hasSubTags = tag.subTags.length > 0;
   const [showSubTags, toggleSubTags] = useToggle(false);
 
   const handleTagClick = () => {
+    if(!memoFilterStore.enableTagMultiSelect){
+      memoFilterStore.removeFilter((f) => f.factor === "tagSearch");
+    }
     if (isActive) {
       memoFilterStore.removeFilter((f) => f.factor === "tagSearch" && f.value === tag.text);
     } else {

@@ -208,6 +208,7 @@ message MemoProperty {
   bool has_task_list = 3;
   bool has_code = 4;
   bool has_incomplete_tasks = 5;
+  bool has_no_tag = 6;
 }
 
 message CreateMemoRequest {
@@ -227,6 +228,10 @@ message ListMemosRequest {
   // Filter is used to filter memos returned in the list.
   // Format: "creator == 'users/{uid}' && visibilities == ['PUBLIC', 'PROTECTED']"
   string filter = 3;
+  // settings for db to enable OR ability
+  bool enable_or = 4;
+  // settings for db to enable NOT ability
+  bool enable_not = 5;
 }
 
 message ListMemosResponse {
@@ -263,6 +268,10 @@ message DeleteMemoRequest {
 message ExportMemosRequest {
   // Same as ListMemosRequest.filter
   string filter = 1;
+  // Same as ListMemosRequest.enable_or
+  bool enable_or = 2;
+  // Same as ListMemosRequest.enable_not
+  bool enable_not = 3;
 }
 
 message ExportMemosResponse {
@@ -273,6 +282,12 @@ message ListMemoPropertiesRequest {
   // The name of the memo.
   // Format: memos/{id}. Use "memos/-" to list all properties.
   string name = 1;
+  // Same as ListMemosRequest.filter
+  string filter = 2;
+  // Same as ListMemosRequest.enable_or
+  bool enable_or = 3;
+  // Same as ListMemosRequest.enable_not
+  bool enable_not = 4;
 }
 
 message ListMemoPropertiesResponse {
@@ -303,6 +318,10 @@ message ListMemoTagsRequest {
   // Filter is used to filter memos.
   // Format: "creator == 'users/{uid}' && visibilities == ['PUBLIC', 'PROTECTED']"
   string filter = 2;
+  // settings for db to enable OR ability
+  bool enable_or = 3;
+  // settings for db to enable NOT ability
+  bool enable_not = 4;
 }
 
 message ListMemoTagsResponse {

@@ -98,6 +98,9 @@ func (d *DB) ListMemos(ctx context.Context, find *store.FindMemo) ([]*store.Memo
 		if v.HasLink {
 			where = append(where, "JSON_EXTRACT(`memo`.`payload`, '$.property.hasLink') IS TRUE")
 		}
+		if v.HasNoTag {
+			where = append(where, "JSON_EXTRACT(`memo`.`payload`, '$.property.hasNoTag') IS TRUE")
+		}
 		if v.HasTaskList {
 			where = append(where, "JSON_EXTRACT(`memo`.`payload`, '$.property.hasTaskList') IS TRUE")
 		}

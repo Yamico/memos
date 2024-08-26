@@ -17,12 +17,21 @@ const SearchBar = () => {
     if (e.key === "Enter") {
       e.preventDefault();
       if (queryText !== "") {
+        memoFilterStore.removeFilter((f) => f.factor === "contentSearch" );
+        const queryWords = queryText.trim().split(/\s+/).filter(word => word !== ""); 
+        for (const word of queryWords) {
+          if (word === "!" || word === "！") {
+            continue; 
+          }
+          memoFilterStore.addFilter({
+            factor: "contentSearch",
+            value: word,
+          });
+        }
+      }
+      else{
         memoFilterStore.removeFilter((f) => f.factor === "contentSearch");
-        memoFilterStore.addFilter({
-          factor: "contentSearch",
-          value: queryText,
-        });
-        setQueryText("");
+        
       }
     }
   };

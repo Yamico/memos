@@ -68,6 +68,21 @@ const MemoRelatedSettings = () => {
         />
       </div>
       <div className="w-full flex flex-row justify-between items-center">
+        <span>{t("setting.system-section.enable-monday-as-first-day")}</span>
+        <Switch
+          checked={memoRelatedSetting.enableMondayFirstDay}
+          onChange={(event) => updatePartialSetting({ enableMondayFirstDay: event.target.checked })}
+        />
+      </div>
+      <div className="w-full flex flex-row justify-between items-center">
+        <span>{t("setting.system-section.enable-extension-statics")}</span>
+        <Switch
+          checked={memoRelatedSetting.enableExtensionStatics}
+          onChange={(event) => updatePartialSetting({ enableExtensionStatics: event.target.checked })}
+        />
+      </div>
+
+      <div className="w-full flex flex-row justify-between items-center">
         <span>Content length limit(Byte)</span>
         <Input
           className="w-24"

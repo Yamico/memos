@@ -12,7 +12,7 @@ interface Props {
 const MemoDetailSidebar = ({ memo, className }: Props) => {
   const t = useTranslate();
   const property = memo.property as MemoProperty;
-  const hasSpecialProperty = property.hasLink || property.hasTaskList || property.hasCode || property.hasIncompleteTasks;
+  const hasSpecialProperty = property.hasLink || property.hasTaskList || property.hasCode || property.hasIncompleteTasks ||property.hasNoTag;
 
   return (
     <aside
@@ -47,6 +47,14 @@ const MemoDetailSidebar = ({ memo, className }: Props) => {
                   <div className="w-auto flex justify-start items-center mr-1">
                     <Icon.Link className="w-4 h-auto mr-1" />
                     <span className="block text-sm">{t("memo.links")}</span>
+                  </div>
+                </div>
+              )}
+              {property.hasNoTag && (
+                <div className="w-auto border dark:border-zinc-800 pl-1 pr-1.5 rounded-md flex justify-between items-center">
+                  <div className="w-auto flex justify-start items-center mr-1">
+                    <Icon.Link className="w-4 h-auto mr-1" />
+                    <span className="block text-sm">{t("memo.no-tags")}</span>
                   </div>
                 </div>
               )}

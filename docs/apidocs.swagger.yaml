@@ -313,6 +313,16 @@ paths:
           in: query
           required: false
           type: string
+        - name: enableOr
+          description: settings for db to enable OR ability
+          in: query
+          required: false
+          type: boolean
+        - name: enableNot
+          description: settings for db to enable NOT ability
+          in: query
+          required: false
+          type: boolean
       tags:
         - MemoService
     post:
@@ -668,9 +678,7 @@ paths:
             $ref: '#/definitions/googlerpcStatus'
       parameters:
         - name: name
-          description: |-
-            The resource name of the workspace setting.
-            Format: settings/{setting}
+          description: "The resource name of the workspace setting.\r\nFormat: settings/{setting}"
           in: path
           required: true
           type: string
@@ -692,9 +700,7 @@ paths:
             $ref: '#/definitions/googlerpcStatus'
       parameters:
         - name: setting.name
-          description: |-
-            name is the name of the setting.
-            Format: settings/{setting}
+          description: "name is the name of the setting.\r\nFormat: settings/{setting}"
           in: path
           required: true
           type: string
@@ -1012,10 +1018,7 @@ paths:
             $ref: '#/definitions/googlerpcStatus'
       parameters:
         - name: name_3
-          description: |-
-            The name of the resource.
-            Format: resources/{id}
-            id is the system generated unique identifier.
+          description: "The name of the resource.\r\nFormat: resources/{id}\r\nid is the system generated unique identifier."
           in: path
           required: true
           type: string
@@ -1037,10 +1040,7 @@ paths:
             $ref: '#/definitions/googlerpcStatus'
       parameters:
         - name: name_3
-          description: |-
-            The name of the resource.
-            Format: resources/{id}
-            id is the system generated unique identifier.
+          description: "The name of the resource.\r\nFormat: resources/{id}\r\nid is the system generated unique identifier."
           in: path
           required: true
           type: string
@@ -1299,6 +1299,21 @@ paths:
           required: true
           type: string
           pattern: memos/[^/]+
+        - name: filter
+          description: Same as ListMemosRequest.filter
+          in: query
+          required: false
+          type: string
+        - name: enableOr
+          description: Same as ListMemosRequest.enable_or
+          in: query
+          required: false
+          type: boolean
+        - name: enableNot
+          description: Same as ListMemosRequest.enable_not
+          in: query
+          required: false
+          type: boolean
       tags:
         - MemoService
   /api/v1/{name}/properties:rebuild:
@@ -1542,6 +1557,16 @@ paths:
           in: query
           required: false
           type: string
+        - name: enableOr
+          description: settings for db to enable OR ability
+          in: query
+          required: false
+          type: boolean
+        - name: enableNot
+          description: settings for db to enable NOT ability
+          in: query
+          required: false
+          type: boolean
       tags:
         - MemoService
   /api/v1/{parent}/tags/{tag}:
@@ -1622,10 +1647,7 @@ paths:
             $ref: '#/definitions/googlerpcStatus'
       parameters:
         - name: resource.name
-          description: |-
-            The name of the resource.
-            Format: resources/{id}
-            id is the system generated unique identifier.
+          description: "The name of the resource.\r\nFormat: resources/{id}\r\nid is the system generated unique identifier."
           in: path
           required: true
           type: string
@@ -1657,9 +1679,7 @@ paths:
                 format: int64
               memo:
                 type: string
-                title: |-
-                  The related memo.
-                  Format: memos/{id}
+                title: "The related memo.\r\nFormat: memos/{id}"
       tags:
         - ResourceService
   /api/v1/{setting.name}:
@@ -1807,10 +1827,7 @@ paths:
             $ref: '#/definitions/googlerpcStatus'
       parameters:
         - name: name
-          description: |-
-            The name of the resource.
-            Format: resources/{id}
-            id is the system generated unique identifier.
+          description: "The name of the resource.\r\nFormat: resources/{id}\r\nid is the system generated unique identifier."
           in: path
           required: true
           type: string
@@ -2097,14 +2114,18 @@ definitions:
       enableLinkPreview:
         type: boolean
         description: enable_link_preview enables links preview.
+      enableMondayFirstDay:
+        type: boolean
+        description: enable_monday_first_day enable monday as first day of the week.
+      enableExtensionStatics:
+        type: boolean
+        description: enable_extension_statics the extension feature for additional statistics panels.
   apiv1WorkspaceSetting:
     type: object
     properties:
       name:
         type: string
-        title: |-
-          name is the name of the setting.
-          Format: settings/{setting}
+        title: "name is the name of the setting.\r\nFormat: settings/{setting}"
       generalSetting:
         $ref: '#/definitions/apiv1WorkspaceGeneralSetting'
       storageSetting:
@@ -2119,9 +2140,7 @@ definitions:
         description: storage_type is the storage type.
       filepathTemplate:
         type: string
-        title: |-
-          The template of file path.
-          e.g. assets/{timestamp}_{filename}
+        title: "The template of file path.\r\ne.g. assets/{timestamp}_{filename}"
       uploadSizeLimitMb:
         type: string
         format: int64
@@ -2377,6 +2396,12 @@ definitions:
       filter:
         type: string
         title: Same as ListMemosRequest.filter
+      enableOr:
+        type: boolean
+        title: Same as ListMemosRequest.enable_or
+      enableNot:
+        type: boolean
+        title: Same as ListMemosRequest.enable_not
   v1ExportMemosResponse:
     type: object
     properties:
@@ -2699,6 +2724,8 @@ definitions:
         type: boolean
       hasIncompleteTasks:
         type: boolean
+      hasNoTag:
+        type: boolean
   v1MemoPropertyEntity:
     type: object
     properties:
@@ -2914,10 +2941,7 @@ definitions:
     properties:
       name:
         type: string
-        description: |-
-          The name of the resource.
-          Format: resources/{id}
-          id is the system generated unique identifier.
+        description: "The name of the resource.\r\nFormat: resources/{id}\r\nid is the system generated unique identifier."
       uid:
         type: string
         description: The user defined id of the resource.
@@ -2939,9 +2963,7 @@ definitions:
         format: int64
       memo:
         type: string
-        title: |-
-          The related memo.
-          Format: memos/{id}
+        title: "The related memo.\r\nFormat: memos/{id}"
   v1RestoreMarkdownNodesRequest:
     type: object
     properties:
